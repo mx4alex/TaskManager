@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	fnc "TaskManager/internal/functions"
+	fnc "TaskManager/internal/taskfunc"
 )
 
 func main() {
