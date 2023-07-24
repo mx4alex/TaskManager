@@ -8,23 +8,11 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"errors"
+	ent "TaskManager/internal/entity"
 )
 
-const tasksFile = "TaskManager/storage/tasks.csv"
-
-type Task struct {
-	ID   int
-	Text string
-	Done bool
-}
-
-func NewTask (id int, text string, done bool) Task {
-	return Task {
-		ID:   id,
-		Text: text,
-		Done: done,
-	}
-}
+const tasksFile = "tasks.csv"
 
 func CommandPrint () {
 	fmt.Println("Выберите действие:")
@@ -37,7 +25,7 @@ func CommandPrint () {
 	fmt.Println()
 }
 
-func CreateTask(Tasks *[]Task) {
+func CreateTask(Tasks *[]ent.Task) error {
 	fmt.Println("Введите задачу:")
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
@@ -45,25 +33,24 @@ func CreateTask(Tasks *[]Task) {
 
 	for _, t := range *Tasks {
 		if t.Text == text {
-			fmt.Println("Задача уже существует:", text)
-			return
+			return errors.New("Задача уже существует")
 		}
 	}
 
-	*Tasks = append(*Tasks, NewTask(len(*Tasks) + 1, text, false))
+	*Tasks = append(*Tasks, ent.NewTask(len(*Tasks) + 1, text, false))
 
 	if err := SaveTasks(*Tasks); err != nil {
-		fmt.Println("Ошибка сохранения задачи:", err)
-		return
+		return errors.New("Ошибка сохранения задачи")
 	}
 
 	fmt.Println("Задача успешно создана:", text)
+
+	return nil
 }
 
-func PrintTasks(Tasks *[]Task) {
+func PrintTasks(Tasks *[]ent.Task) error {
 	if len(*Tasks) == 0 {
-		fmt.Println("Список задач пуст.")
-		return
+		return errors.New("Список задач пуст")
 	}
 
 	fmt.Println("Список задач:")
@@ -74,12 +61,13 @@ func PrintTasks(Tasks *[]Task) {
 			fmt.Printf("%d. [ ] %s\n", t.ID, t.Text)
 		}
 	}
+
+	return nil
 }
 
-func UpdateTask(Tasks *[]Task) {
+func UpdateTask(Tasks *[]ent.Task) error {
 	if len(*Tasks) == 0 {
-		fmt.Println("Список задач пуст.")
-		return
+		return errors.New("Список задач пуст")
 	}
 
 	PrintTasks(Tasks)
@@ -103,22 +91,21 @@ func UpdateTask(Tasks *[]Task) {
 	}
 
 	if !found {
-		fmt.Println("Задача с ID", id, "не найдена.")
-		return
+		return errors.New("Задача с заданным ID не найдена")
 	}
 
 	if err := SaveTasks(*Tasks); err != nil {
-		fmt.Println("Ошибка сохранения задачи:", err)
-		return
+		return errors.New("Ошибка сохранения задачи")
 	}
 
 	fmt.Println("Задача успешно обновлена.")
+
+	return nil
 }
 
-func MarkTask(Tasks *[]Task) {
+func MarkTask(Tasks *[]ent.Task) error {
 	if len(*Tasks) == 0 {
-		fmt.Println("Список задач пуст.")
-		return
+		return errors.New("Список задач пуст")
 	}
 
 	PrintTasks(Tasks)
@@ -137,27 +124,26 @@ func MarkTask(Tasks *[]Task) {
 	}
 
 	if !found {
-		fmt.Println("Задача с ID", id, "не найдена.")
-		return
+		return errors.New("Задача с заданным ID не найдена")
 	}
 
 	if err := SaveTasks(*Tasks); err != nil {
-		fmt.Println("Ошибка сохранения задач:", err)
-		return
+		return errors.New("Ошибка сохранения задачи")
 	}
 
 	fmt.Println("Задача успешно отмечена как выполненная.")
+
+	return nil
 }
 
-func DeleteTask(Tasks *[]Task) {
+func DeleteTask(Tasks *[]ent.Task) error {
 	if len(*Tasks) == 0 {
-		fmt.Println("Список задач пуст.")
-		return
+		return errors.New("Список задач пуст")
 	}
 
 	PrintTasks(Tasks)
-
 	fmt.Println("Введите ID задачи для удаления:")
+	
 	var id int
 	fmt.Scanln(&id)
 
@@ -171,27 +157,27 @@ func DeleteTask(Tasks *[]Task) {
 	}
 
 	if !found {
-		fmt.Println("Задача с ID", id, "не найдена.")
-		return
+		return errors.New("Задача с заданным ID не найдена")
 	}
 
 	if err := SaveTasks(*Tasks); err != nil {
-		fmt.Println("Ошибка сохранения задач:", err)
-		return
+		return errors.New("Ошибка сохранения задачи")
 	}
 
 	fmt.Println("Задача успешно удалена.")
+
+	return nil
 }
 
-func ReadTasks() ([]Task, error) {
-	file, err := os.Open(tasksFile)
+func ReadTasks() ([]ent.Task, error) {
+	file, err := os.OpenFile(tasksFile, os.O_CREATE|os.O_RDWR, 0777) 
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
 	reader := csv.NewReader(file)
-	var Tasks []Task
+	var Tasks []ent.Task
 
 	for {
 		record, err := reader.Read()
@@ -205,13 +191,13 @@ func ReadTasks() ([]Task, error) {
 		id, _ := strconv.Atoi(record[0]) 
 		done, _ := strconv.ParseBool(record[2])
 
-		Tasks = append(Tasks, NewTask(id, record[1], done))
+		Tasks = append(Tasks, ent.NewTask(id, record[1], done))
 	}
 
 	return Tasks, nil
 }
 
-func SaveTasks(Tasks []Task) error {
+func SaveTasks(Tasks []ent.Task) error {
 	file, err := os.OpenFile(tasksFile, os.O_CREATE|os.O_RDWR, 0777)
 	if err != nil {
 		return err
