@@ -2,17 +2,17 @@ package taskfunc
 
 import (
 	"bufio"
-	"encoding/csv"
 	"fmt"
-	"io"
 	"os"
-	"strconv"
 	"strings"
 	"errors"
 	ent "TaskManager/internal/entity"
+
+	"database/sql"
+	_ "github.com/mattn/go-sqlite3"
 )
 
-const tasksFile = "tasks.csv"
+const tasksDB = "storage/tasks.db"
 
 func CommandPrint () {
 	fmt.Println("Выберите действие:")
@@ -170,50 +170,65 @@ func DeleteTask(Tasks *[]ent.Task) error {
 }
 
 func ReadTasks() ([]ent.Task, error) {
-	file, err := os.OpenFile(tasksFile, os.O_CREATE|os.O_RDWR, 0777) 
+	db, err := sql.Open("sqlite3", tasksDB)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer db.Close()
 
-	reader := csv.NewReader(file)
+	rows, err := db.Query("SELECT id, text, done FROM tasks")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
 	var Tasks []ent.Task
 
-	for {
-		record, err := reader.Read()
+	for rows.Next() {
+		var id int
+		var text string
+		var done bool
+
+		err := rows.Scan(&id, &text, &done)
 		if err != nil {
-			if err == io.EOF {
-				break
-			}
 			return nil, err
 		}
 
-		id, _ := strconv.Atoi(record[0]) 
-		done, _ := strconv.ParseBool(record[2])
-
-		Tasks = append(Tasks, ent.NewTask(id, record[1], done))
+		Tasks = append(Tasks, ent.NewTask(id, text, done))
 	}
 
 	return Tasks, nil
 }
 
 func SaveTasks(Tasks []ent.Task) error {
-	file, err := os.OpenFile(tasksFile, os.O_CREATE|os.O_RDWR, 0777)
+	db, err := sql.Open("sqlite3", tasksDB)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer db.Close()
 
-	writer := csv.NewWriter(file)
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY, text TEXT, done INTEGER)")
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec("DELETE FROM tasks")
+	if err != nil {
+		return err
+	}
+
+	statement, err := db.Prepare("INSERT INTO tasks (id, text, done) VALUES (?, ?, ?)")
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
 
 	for _, t := range Tasks {
-		record := []string{strconv.Itoa(t.ID), t.Text, strconv.FormatBool(t.Done)}
-		if err := writer.Write(record); err != nil {
+		_, err = statement.Exec(t.ID, t.Text, t.Done)
+		if err != nil {
 			return err
 		}
 	}
-
-	writer.Flush()
 
 	return nil
 }

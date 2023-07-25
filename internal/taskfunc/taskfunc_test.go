@@ -209,3 +209,17 @@ func TestErrDeleteTask2(t *testing.T) {
 		t.Errorf("Expcted error: %v, but got: %v", ErrIdNotFound, err)
 	}
 }
+
+func TestReadSaveTask(t *testing.T) {
+	expectedTasks := []ent.Task{
+		ent.NewTask(1, "Task 1", false),
+		ent.NewTask(2, "Task 2", false),
+	}
+
+	SaveTasks(expectedTasks)
+	tasks, _ := ReadTasks()
+
+	if !reflect.DeepEqual(tasks, expectedTasks) {
+		t.Errorf("Expcted tasks: %v, but got: %v", expectedTasks, tasks)
+	}
+}
