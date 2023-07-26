@@ -2,34 +2,55 @@ package main
 
 import (
 	"fmt"
-	fnc "TaskManager/internal/taskfunc"
+	"TaskManager/internal/app"
 )
 
 func main() {
 	var cmd string
-
-	Tasks, err := fnc.ReadTasks()
+	
+	taskManager := app.NewTaskManager()
+	
+	err := taskManager.ReadTasks()
 	if err != nil {
 		fmt.Println("Ошибка чтения данных о задачах:", err)
-		return
+		// return
 	}
 
 	for {
-		fnc.CommandPrint()
+		taskManager.CommandPrint()
 		fmt.Scanln(&cmd)
 
 		switch cmd {
 		case "Create":
-			fnc.CreateTask(&Tasks)
+			err := taskManager.CreateTask()
+			if err != nil {
+				fmt.Println(err)
+			}
 		case "Read":
-			fnc.PrintTasks(&Tasks)
+			err := taskManager.PrintTasks()
+			if err != nil {
+				fmt.Println(err)
+			}
 		case "Update":
-			fnc.UpdateTask(&Tasks)
+			err := taskManager.UpdateTask()
+			if err != nil {
+				fmt.Println(err)
+			}
 		case "Mark":
-			fnc.MarkTask(&Tasks)
+			err := taskManager.MarkTask()
+			if err != nil {
+				fmt.Println(err)
+			}
 		case "Delete":
-			fnc.DeleteTask(&Tasks)
+			err := taskManager.DeleteTask()
+			if err != nil {
+				fmt.Println(err)
+			}
 		case "Exit":
+			err := taskManager.SaveTasks()
+			if err != nil {
+				fmt.Println("Ошибка сохранения задач:", err)
+			}
 			fmt.Println("Программа завершена.")
 			return
 		default:

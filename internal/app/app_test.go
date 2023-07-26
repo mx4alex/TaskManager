@@ -1,4 +1,4 @@
-package taskfunc
+package app
 
 import (
 	"errors"
@@ -13,12 +13,13 @@ var ErrIdNotFound = errors.New("Задача с заданным ID не най�
 var ErrTaskExist = errors.New("Задача уже существует")
 
 func TestCreateTask(t *testing.T) {
-	tasks := []ent.Task{
+	tm := NewTaskManager()
+	tm.Tasks = []ent.Task{
 		ent.NewTask(1, "Task 1", false),
 		ent.NewTask(2, "Task 2", false),
 	}
 
-	expectedTasks := append(tasks, ent.NewTask(3, "New Task", false))
+	expectedTasks := append(tm.Tasks, ent.NewTask(3, "New Task", false))
 
 	input := "New Task\n"
 	r, w, _ := os.Pipe()
@@ -26,15 +27,16 @@ func TestCreateTask(t *testing.T) {
 	w.Write([]byte(input))
 	w.Close()
 
-	CreateTask(&tasks)
+	tm.CreateTask()
 
-	if !reflect.DeepEqual(tasks, expectedTasks) {
-		t.Errorf("Expected tasks: %v, but got: %v", expectedTasks, tasks)
+	if !reflect.DeepEqual(tm.Tasks, expectedTasks) {
+		t.Errorf("Expected tasks: %v, but got: %v", expectedTasks, tm.Tasks)
 	}
 }
 
 func TestErrCreateTask(t *testing.T) {
-	tasks := []ent.Task{
+	tm := NewTaskManager()
+	tm.Tasks = []ent.Task{
 		ent.NewTask(1, "Task 1", false),
 		ent.NewTask(2, "Task 2", false),
 	}
@@ -45,7 +47,7 @@ func TestErrCreateTask(t *testing.T) {
 	w.Write([]byte(input))
 	w.Close()
 
-	err := CreateTask(&tasks)
+	err := tm.CreateTask()
 
 	if !reflect.DeepEqual(err, ErrTaskExist) {
 		t.Errorf("Expected error: %v, but got: %v", ErrTaskExist, err)
@@ -53,7 +55,8 @@ func TestErrCreateTask(t *testing.T) {
 }
 
 func TestUpdateTask(t *testing.T) {
-	tasks := []ent.Task{
+	tm := NewTaskManager()
+	tm.Tasks = []ent.Task{
 		ent.NewTask(1, "Task 1", false),
 		ent.NewTask(2, "Task 2", false),
 	}
@@ -69,17 +72,17 @@ func TestUpdateTask(t *testing.T) {
 	w.Write([]byte(input))
 	w.Close()
 
-	UpdateTask(&tasks)
+	tm.UpdateTask()
 
-	if !reflect.DeepEqual(tasks, expectedTasks) {
-		t.Errorf("Expected tasks: %v, but got: %v", expectedTasks, tasks)
+	if !reflect.DeepEqual(tm.Tasks, expectedTasks) {
+		t.Errorf("Expected tasks: %v, but got: %v", expectedTasks, tm.Tasks)
 	}
 }
 
 func TestErrUpdateTask1(t *testing.T) {
-	tasks := []ent.Task{}
+	tm := NewTaskManager()
 
-	err := UpdateTask(&tasks)
+	err := tm.UpdateTask()
 
 	if !reflect.DeepEqual(err, ErrEmptyList) {
 		t.Errorf("Expcted error: %v, but got: %v", ErrEmptyList, err)
@@ -87,7 +90,8 @@ func TestErrUpdateTask1(t *testing.T) {
 }
 
 func TestErrUpdateTask2(t *testing.T) {
-	tasks := []ent.Task{
+	tm := NewTaskManager()
+	tm.Tasks = []ent.Task{
 		ent.NewTask(1, "Task 1", false),
 		ent.NewTask(2, "Task 2", false),
 	}
@@ -98,7 +102,7 @@ func TestErrUpdateTask2(t *testing.T) {
 	w.Write([]byte(input))
 	w.Close()
 
-	err := UpdateTask(&tasks)
+	err := tm.UpdateTask()
 
 	if !reflect.DeepEqual(err, ErrIdNotFound) {
 		t.Errorf("Expcted error: %v, but got: %v", ErrIdNotFound, err)
@@ -106,7 +110,8 @@ func TestErrUpdateTask2(t *testing.T) {
 }
 
 func TestMarkTask(t *testing.T) {
-	tasks := []ent.Task{
+	tm := NewTaskManager()
+	tm.Tasks = []ent.Task{
 		ent.NewTask(1, "Task 1", false),
 		ent.NewTask(2, "Task 2", false),
 	}
@@ -122,25 +127,26 @@ func TestMarkTask(t *testing.T) {
 	w.Write([]byte(input))
 	w.Close()
 
-	MarkTask(&tasks)
+	tm.MarkTask()
 
-	if !reflect.DeepEqual(tasks, expectedTasks) {
-		t.Errorf("Expected tasks: %v, but got: %v", expectedTasks, tasks)
+	if !reflect.DeepEqual(tm.Tasks, expectedTasks) {
+		t.Errorf("Expected tasks: %v, but got: %v", expectedTasks, tm.Tasks)
 	}
 }
 
 func TestErrMarkTask1(t *testing.T) {
-	tasks := []ent.Task{}
+	tm := NewTaskManager()
 
-	err :=  MarkTask(&tasks)
+	err := tm.UpdateTask()
 
 	if !reflect.DeepEqual(err, ErrEmptyList) {
-		t.Errorf("Expcted error: %v, but got: %v", ErrEmptyList, err)
+		t.Errorf("Expected error: %v, but got: %v", ErrEmptyList, err)
 	}
 }
 
 func TestErrMarkTask2(t *testing.T) {
-	tasks := []ent.Task{
+	tm := NewTaskManager()
+	tm.Tasks = []ent.Task{
 		ent.NewTask(1, "Task 1", false),
 		ent.NewTask(2, "Task 2", false),
 	}
@@ -151,7 +157,7 @@ func TestErrMarkTask2(t *testing.T) {
 	w.Write([]byte(input))
 	w.Close()
 
-	err := MarkTask(&tasks)
+	err := tm.MarkTask()
 
 	if !reflect.DeepEqual(err, ErrIdNotFound) {
 		t.Errorf("Expcted error: %v, but got: %v", ErrIdNotFound, err)
@@ -159,7 +165,8 @@ func TestErrMarkTask2(t *testing.T) {
 }
 
 func TestDeleteTask(t *testing.T) {
-	tasks := []ent.Task{
+	tm := NewTaskManager()
+	tm.Tasks = []ent.Task{
 		ent.NewTask(1, "Task 1", false),
 		ent.NewTask(2, "Task 2", false),
 	}
@@ -174,25 +181,26 @@ func TestDeleteTask(t *testing.T) {
 	w.Write([]byte(input))
 	w.Close()
 
-	DeleteTask(&tasks)
+	tm.DeleteTask()
 
-	if !reflect.DeepEqual(tasks, expectedTasks) {
-		t.Errorf("Expected tasks: %v, but got: %v", expectedTasks, tasks)
+	if !reflect.DeepEqual(tm.Tasks, expectedTasks) {
+		t.Errorf("Expected tasks: %v, but got: %v", expectedTasks, tm.Tasks)
 	}
 }
 
 func TestErrDeleteTask1(t *testing.T) {
-	tasks := []ent.Task{}
+	tm := NewTaskManager()
 
-	err := DeleteTask(&tasks)
+	err := tm.UpdateTask()
 
 	if !reflect.DeepEqual(err, ErrEmptyList) {
-		t.Errorf("Expcted error: %v, but got: %v", ErrEmptyList, err)
+		t.Errorf("Expected error: %v, but got: %v", ErrEmptyList, err)
 	}
 }
 
 func TestErrDeleteTask2(t *testing.T) {
-	tasks := []ent.Task{
+	tm := NewTaskManager()
+	tm.Tasks = []ent.Task{
 		ent.NewTask(1, "Task 1", false),
 		ent.NewTask(2, "Task 2", false),
 	}
@@ -203,23 +211,29 @@ func TestErrDeleteTask2(t *testing.T) {
 	w.Write([]byte(input))
 	w.Close()
 
-	err := DeleteTask(&tasks)
+	err := tm.DeleteTask()
 
 	if !reflect.DeepEqual(err, ErrIdNotFound) {
-		t.Errorf("Expcted error: %v, but got: %v", ErrIdNotFound, err)
+		t.Errorf("Expected error: %v, but got: %v", ErrIdNotFound, err)
 	}
 }
 
 func TestReadSaveTask(t *testing.T) {
+	tm := NewTaskManager()
+	tm.Tasks = []ent.Task{
+		ent.NewTask(1, "Task 1", false),
+		ent.NewTask(2, "Task 2", false),
+	}
+	
 	expectedTasks := []ent.Task{
 		ent.NewTask(1, "Task 1", false),
 		ent.NewTask(2, "Task 2", false),
 	}
 
-	SaveTasks(expectedTasks)
-	tasks, _ := ReadTasks()
+	tm.SaveTasks()
+	tm.ReadTasks()
 
-	if !reflect.DeepEqual(tasks, expectedTasks) {
-		t.Errorf("Expcted tasks: %v, but got: %v", expectedTasks, tasks)
+	if !reflect.DeepEqual(tm.Tasks, expectedTasks) {
+		t.Errorf("Expected tasks: %v, but got: %v", expectedTasks, tm.Tasks)
 	}
 }

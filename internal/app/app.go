@@ -1,4 +1,4 @@
-package taskfunc
+package app
 
 import (
 	"bufio"
@@ -14,7 +14,15 @@ import (
 
 const tasksDB = "storage/tasks.db"
 
-func CommandPrint () {
+type TaskManager struct {
+	Tasks []ent.Task
+}
+
+func NewTaskManager() *TaskManager {
+	return &TaskManager{}
+}
+
+func (tm *TaskManager) CommandPrint() {
 	fmt.Println("Выберите действие:")
 	fmt.Println("Create - Создать задачу")
 	fmt.Println("Read - Показать список задач")
@@ -25,21 +33,21 @@ func CommandPrint () {
 	fmt.Println()
 }
 
-func CreateTask(Tasks *[]ent.Task) error {
+func (tm *TaskManager) CreateTask() error {
 	fmt.Println("Введите задачу:")
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
 	text = strings.TrimSpace(text)
 
-	for _, t := range *Tasks {
+	for _, t := range tm.Tasks {
 		if t.Text == text {
 			return errors.New("Задача уже существует")
 		}
 	}
 
-	*Tasks = append(*Tasks, ent.NewTask(len(*Tasks) + 1, text, false))
+	tm.Tasks = append(tm.Tasks, ent.NewTask(len(tm.Tasks) + 1, text, false))
 
-	if err := SaveTasks(*Tasks); err != nil {
+	if err := tm.SaveTasks(); err != nil {
 		return errors.New("Ошибка сохранения задачи")
 	}
 
@@ -48,13 +56,13 @@ func CreateTask(Tasks *[]ent.Task) error {
 	return nil
 }
 
-func PrintTasks(Tasks *[]ent.Task) error {
-	if len(*Tasks) == 0 {
+func (tm *TaskManager) PrintTasks() error {
+	if len(tm.Tasks) == 0 {
 		return errors.New("Список задач пуст")
 	}
 
 	fmt.Println("Список задач:")
-	for _, t := range *Tasks {
+	for _, t := range tm.Tasks {
 		if t.Done {
 			fmt.Printf("%d. [x] %s\n", t.ID, t.Text)
 		} else {
@@ -65,19 +73,19 @@ func PrintTasks(Tasks *[]ent.Task) error {
 	return nil
 }
 
-func UpdateTask(Tasks *[]ent.Task) error {
-	if len(*Tasks) == 0 {
+func (tm *TaskManager) UpdateTask() error {
+	if len(tm.Tasks) == 0 {
 		return errors.New("Список задач пуст")
 	}
 
-	PrintTasks(Tasks)
+	tm.PrintTasks()
 
 	fmt.Println("Введите ID задачи для обновления:")
 	var id int
 	fmt.Scanf("%d\n", &id)
 
 	var found bool
-	for i, t := range *Tasks {
+	for i, t := range tm.Tasks {
 		if t.ID == id {
 			found = true
 			fmt.Println("Введите новый текст задачи:")
@@ -85,7 +93,7 @@ func UpdateTask(Tasks *[]ent.Task) error {
 			newText, _ := reader.ReadString('\n')
 			newText = strings.TrimSpace(newText)
 
-			(*Tasks)[i].Text = newText
+			tm.Tasks[i].Text = newText
 			break
 		}
 	}
@@ -94,7 +102,7 @@ func UpdateTask(Tasks *[]ent.Task) error {
 		return errors.New("Задача с заданным ID не найдена")
 	}
 
-	if err := SaveTasks(*Tasks); err != nil {
+	if err := tm.SaveTasks(); err != nil {
 		return errors.New("Ошибка сохранения задачи")
 	}
 
@@ -103,22 +111,22 @@ func UpdateTask(Tasks *[]ent.Task) error {
 	return nil
 }
 
-func MarkTask(Tasks *[]ent.Task) error {
-	if len(*Tasks) == 0 {
+func (tm *TaskManager) MarkTask() error {
+	if len(tm.Tasks) == 0 {
 		return errors.New("Список задач пуст")
 	}
 
-	PrintTasks(Tasks)
+	tm.PrintTasks()
 
 	fmt.Println("Введите ID задачи, которую нужно отметить как выполненную:")
 	var id int
 	fmt.Scanln(&id)
 
 	var found bool
-	for i, t := range *Tasks {
+	for i, t := range tm.Tasks {
 		if t.ID == id {
 			found = true
-			(*Tasks)[i].Done = true
+			tm.Tasks[i].Done = true
 			break
 		}
 	}
@@ -127,7 +135,7 @@ func MarkTask(Tasks *[]ent.Task) error {
 		return errors.New("Задача с заданным ID не найдена")
 	}
 
-	if err := SaveTasks(*Tasks); err != nil {
+	if err := tm.SaveTasks(); err != nil {
 		return errors.New("Ошибка сохранения задачи")
 	}
 
@@ -136,22 +144,22 @@ func MarkTask(Tasks *[]ent.Task) error {
 	return nil
 }
 
-func DeleteTask(Tasks *[]ent.Task) error {
-	if len(*Tasks) == 0 {
+func (tm *TaskManager) DeleteTask() error {
+	if len(tm.Tasks) == 0 {
 		return errors.New("Список задач пуст")
 	}
 
-	PrintTasks(Tasks)
+	tm.PrintTasks()
 	fmt.Println("Введите ID задачи для удаления:")
-	
+
 	var id int
 	fmt.Scanln(&id)
 
 	var found bool
-	for i, t := range *Tasks {
+	for i, t := range tm.Tasks {
 		if t.ID == id {
 			found = true
-			*Tasks = append((*Tasks)[:i], (*Tasks)[i+1:]...)
+			tm.Tasks = append(tm.Tasks[:i], tm.Tasks[i+1:]...)
 			break
 		}
 	}
@@ -160,7 +168,7 @@ func DeleteTask(Tasks *[]ent.Task) error {
 		return errors.New("Задача с заданным ID не найдена")
 	}
 
-	if err := SaveTasks(*Tasks); err != nil {
+	if err := tm.SaveTasks(); err != nil {
 		return errors.New("Ошибка сохранения задачи")
 	}
 
@@ -169,20 +177,20 @@ func DeleteTask(Tasks *[]ent.Task) error {
 	return nil
 }
 
-func ReadTasks() ([]ent.Task, error) {
+func (tm *TaskManager) ReadTasks() error {
 	db, err := sql.Open("sqlite3", tasksDB)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer db.Close()
 
 	rows, err := db.Query("SELECT id, text, done FROM tasks")
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer rows.Close()
 
-	var Tasks []ent.Task
+	tm.Tasks = nil
 
 	for rows.Next() {
 		var id int
@@ -191,16 +199,16 @@ func ReadTasks() ([]ent.Task, error) {
 
 		err := rows.Scan(&id, &text, &done)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		Tasks = append(Tasks, ent.NewTask(id, text, done))
+		tm.Tasks = append(tm.Tasks, ent.NewTask(id, text, done))
 	}
 
-	return Tasks, nil
+	return nil
 }
 
-func SaveTasks(Tasks []ent.Task) error {
+func (tm *TaskManager) SaveTasks() error {
 	db, err := sql.Open("sqlite3", tasksDB)
 	if err != nil {
 		return err
@@ -223,7 +231,7 @@ func SaveTasks(Tasks []ent.Task) error {
 	}
 	defer statement.Close()
 
-	for _, t := range Tasks {
+	for _, t := range tm.Tasks {
 		_, err = statement.Exec(t.ID, t.Text, t.Done)
 		if err != nil {
 			return err
