@@ -1,62 +1,42 @@
 package main
 
 import (
-	"fmt"
-	"TaskManager/internal/app"
+	"TaskManager/internal/cli_application"
+	"TaskManager/internal/config"
+	"TaskManager/internal/storage/sqlite_storage"
+	"TaskManager/internal/storage/memory_storage"
+	"TaskManager/internal/usecase"
+	"log"
+	"errors"
 )
 
+func chooseStorage(appConfig config.Config) (usecase.TaskStorage, error) {
+	switch appConfig.StorageType {
+	case "memory":
+		return memory_storage.New()
+	case "sqlite":
+		return sqlite_storage.New()
+	default:
+		return nil, errors.New("wrong storage type")
+	}
+}
+
 func main() {
-	var cmd string
-	
-	taskManager := app.NewTaskManager()
-	
-	err := taskManager.ReadTasks()
+	appConfig, err := config.New()
 	if err != nil {
-		fmt.Println("Ошибка чтения данных о задачах:", err)
-		// return
+		log.Fatal(err)
 	}
 
-	for {
-		taskManager.CommandPrint()
-		fmt.Scanln(&cmd)
+	taskStorage, err := chooseStorage(appConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		switch cmd {
-		case "Create":
-			err := taskManager.CreateTask()
-			if err != nil {
-				fmt.Println(err)
-			}
-		case "Read":
-			err := taskManager.PrintTasks()
-			if err != nil {
-				fmt.Println(err)
-			}
-		case "Update":
-			err := taskManager.UpdateTask()
-			if err != nil {
-				fmt.Println(err)
-			}
-		case "Mark":
-			err := taskManager.MarkTask()
-			if err != nil {
-				fmt.Println(err)
-			}
-		case "Delete":
-			err := taskManager.DeleteTask()
-			if err != nil {
-				fmt.Println(err)
-			}
-		case "Exit":
-			err := taskManager.SaveTasks()
-			if err != nil {
-				fmt.Println("Ошибка сохранения задач:", err)
-			}
-			fmt.Println("Программа завершена.")
-			return
-		default:
-			fmt.Println("Недопустимое действие.")
-		}
+	taskInteractor := usecase.NewTaskInteractor(taskStorage)
+	taskCLI := cli_application.NewTaskCLI(taskInteractor)
 
-		fmt.Println()
+	err = taskCLI.Run()
+	if err != nil {
+		log.Fatal(err)
 	}
 }

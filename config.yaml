@@ -1,0 +1,2 @@
+#тип хранилища данных (memory или sqlite)
+storage_type: sqlite
