@@ -1,0 +1,5 @@
+CREATE TABLE tasks (
+    id SERIAL PRIMARY KEY,
+    txt TEXT NOT NULL,
+    done INTEGER NOT NULL
+);
