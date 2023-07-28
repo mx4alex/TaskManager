@@ -21,7 +21,7 @@
 - [x] clean architecture
 - [x] storage variations (memory, sqlite)
 - [x] config
-- [x] migratons
+- [x] migrations
 - [ ] export/import json
 - [ ] integration tests
 - [ ] mocks
