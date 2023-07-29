@@ -3,3 +3,6 @@ storage_type: sqlite
 
 #конфигурация http сервера
 http_port: ":8080"
+
+#тип интерфейса (cli или rest_api)
+interface: rest_api

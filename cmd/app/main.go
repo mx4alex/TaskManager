@@ -5,9 +5,10 @@ import (
 	"TaskManager/internal/storage/sqlite_storage"
 	"TaskManager/internal/storage/memory_storage"
 	"TaskManager/internal/usecase"
+	"TaskManager/internal/delivery/cli_application"
+	"TaskManager/internal/delivery/http_server"
 	"log"
 	"errors"
-	"TaskManager/internal/delivery/http_server"
 )
 
 func chooseStorage(appConfig config.Config) (usecase.TaskStorage, error) {
@@ -19,6 +20,28 @@ func chooseStorage(appConfig config.Config) (usecase.TaskStorage, error) {
 	default:
 		return nil, errors.New("wrong storage type")
 	}
+}
+
+func chooseInterface(appConfig config.Config, taskInteractor *usecase.TaskInteractor) {
+	switch appConfig.Interface {
+	case "cli":
+		taskCLI := cli_application.NewTaskCLI(taskInteractor)
+
+		err := taskCLI.Run()
+		if err != nil {
+			log.Fatal(err)
+		}
+	case "rest_api":
+		handlers := http_server.NewHandler(taskInteractor)
+
+		srv := new(http_server.Server)
+		
+		err := srv.Run(appConfig.HttpPort, handlers.InitRoutes())
+		if err != nil {
+			log.Fatalf("error occured while running http server: %s", err.Error())
+		}
+	}
+
 }
 
 func main() {
@@ -33,12 +56,6 @@ func main() {
 	}
 
 	taskInteractor := usecase.NewTaskInteractor(taskStorage)
-	handlers := http_server.NewHandler(taskInteractor)
-
-	srv := new(http_server.Server)
-
-	err = srv.Run(appConfig.HttpPort, handlers.InitRoutes())
-	if err != nil {
-		log.Fatalf("error occured while running http server: %s", err.Error())
-	}
+	
+	chooseInterface(appConfig, taskInteractor)
 }
