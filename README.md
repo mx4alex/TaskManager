@@ -22,12 +22,12 @@
 - [x] storage variations (memory, sqlite)
 - [x] config
 - [x] migrations
-- [ ] export/import json
+- [x] REST
+- [x] export/import json
 - [ ] integration tests
 - [ ] mocks
 - [ ] observity
 - [ ] image app
-- [ ] REST
 - [ ] GRPC
 - [ ] concurrency
 - [ ] graceful shutdown
