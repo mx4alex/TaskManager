@@ -10,9 +10,9 @@ const (
 )
 
 type Config struct {
-	StorageType string `mapstructure:"storage_type"`
+	StorageType string  `mapstructure:"storage_type"`
+	HttpPort  	string	`mapstructure:"http_port"`
 }
-
 func New() (Config, error) {
 	vpr := viper.New()
 	vpr.AddConfigPath(ConfigFilePath)

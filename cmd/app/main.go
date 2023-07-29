@@ -1,13 +1,13 @@
 package main
 
 import (
-	"TaskManager/internal/cli_application"
 	"TaskManager/internal/config"
 	"TaskManager/internal/storage/sqlite_storage"
 	"TaskManager/internal/storage/memory_storage"
 	"TaskManager/internal/usecase"
 	"log"
 	"errors"
+	"TaskManager/internal/delivery/http_server"
 )
 
 func chooseStorage(appConfig config.Config) (usecase.TaskStorage, error) {
@@ -33,10 +33,12 @@ func main() {
 	}
 
 	taskInteractor := usecase.NewTaskInteractor(taskStorage)
-	taskCLI := cli_application.NewTaskCLI(taskInteractor)
+	handlers := http_server.NewHandler(taskInteractor)
 
-	err = taskCLI.Run()
+	srv := new(http_server.Server)
+
+	err = srv.Run(appConfig.HttpPort, handlers.InitRoutes())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("error occured while running http server: %s", err.Error())
 	}
 }
