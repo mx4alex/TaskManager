@@ -1,8 +1,10 @@
 package sqlite_storage
 
 import (
-	"database/sql"
 	"TaskManager/internal/entity"
+	"database/sql"
+	"log"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -38,9 +40,14 @@ func (s *SQLiteStorage) AddTask(newText string) error {
 	}
 	defer statement.Close()
 
-	s.id++
+	var count int
+	row := s.db.QueryRow("SELECT COUNT (id) FROM tasks")
+	err = row.Scan(&count)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	_, err = statement.Exec(s.id, newText, false)
+	_, err = statement.Exec(count + 1, newText, false)
 	if err != nil {
 		return err
 	}
