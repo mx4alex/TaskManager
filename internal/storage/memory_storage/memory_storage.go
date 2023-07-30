@@ -3,9 +3,11 @@ package memory_storage
 import (
 	"errors"
 	"TaskManager/internal/entity"
+	"sync"
 )
 
 type MemoryTaskStorage struct {
+	sync.RWMutex
 	data []entity.Task
 }
 
@@ -14,15 +16,24 @@ func New() (*MemoryTaskStorage, error) {
 }
 
 func (ms *MemoryTaskStorage) AddTask(newText string) error {
+	ms.Lock()
+	defer ms.Unlock()
+
 	ms.data = append(ms.data, entity.NewTask(len(ms.data) + 1, newText, false))
 	return nil
 }
 
 func (ms *MemoryTaskStorage) GetTasks() ([]entity.Task, error) {
+	ms.Lock()
+	defer ms.Unlock()
+	
 	return ms.data, nil
 }
 
 func (ms *MemoryTaskStorage) UpdateTask(id int, newText string) error {
+	ms.Lock()
+	defer ms.Unlock()
+
 	var found bool
 	
 	for i, t := range ms.data {
@@ -32,6 +43,7 @@ func (ms *MemoryTaskStorage) UpdateTask(id int, newText string) error {
 			break
 		}
 	}
+
 	if !found {
 		return errors.New("task not found")
 	}
@@ -40,8 +52,11 @@ func (ms *MemoryTaskStorage) UpdateTask(id int, newText string) error {
 }
 
 func (ms *MemoryTaskStorage) MarkTask(id int) error {
+	ms.Lock()
+	defer ms.Unlock()
+
 	var found bool
-	
+
 	for i, t := range ms.data {
 		if t.ID == id {
 			found = true
@@ -49,6 +64,7 @@ func (ms *MemoryTaskStorage) MarkTask(id int) error {
 			break
 		}
 	}
+
 	if !found {
 		return errors.New("task not found")
 	}
@@ -57,6 +73,9 @@ func (ms *MemoryTaskStorage) MarkTask(id int) error {
 }
 
 func (ms *MemoryTaskStorage) DeleteTask(id int) error {
+	ms.Lock()
+	defer ms.Unlock()
+
 	var found bool
 	
 	for i, t := range ms.data {

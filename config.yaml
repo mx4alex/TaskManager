@@ -1,5 +1,5 @@
 #тип хранилища данных (memory или sqlite)
-storage_type: sqlite
+storage_type: memory
 
 #конфигурация http сервера
 http_port: ":8080"
