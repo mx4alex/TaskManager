@@ -7,8 +7,11 @@ import (
 	"TaskManager/internal/usecase"
 	"TaskManager/internal/delivery/cli_application"
 	"TaskManager/internal/delivery/http_server"
+	"context"
 	"log"
 	"errors"
+	"os"
+	"os/signal"
 )
 
 func chooseStorage(appConfig config.Config) (usecase.TaskStorage, error) {
@@ -36,12 +39,23 @@ func chooseInterface(appConfig config.Config, taskInteractor *usecase.TaskIntera
 
 		srv := new(http_server.Server)
 		
-		err := srv.Run(appConfig.HttpPort, handlers.InitRoutes())
-		if err != nil {
-			log.Fatalf("error occured while running http server: %s", err.Error())
+		go func() {
+			if err := srv.Run(appConfig.HttpPort, handlers.InitRoutes()); err != nil {
+				log.Fatalf("error occured while running http server: %s", err.Error())
+			}
+		}()
+		log.Print("App Started")
+
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, os.Interrupt)
+		<-quit
+	
+		log.Print("App Shutting Down")
+
+		if err := srv.Shutdown(context.Background()); err != nil {
+			log.Fatal("error occured on server shutting down: %s", err.Error())
 		}
 	}
-
 }
 
 func main() {

@@ -24,10 +24,10 @@
 - [x] migrations
 - [x] REST
 - [x] export/import json
+- [x] concurrency
+- [x] graceful shutdown
 - [ ] integration tests
 - [ ] mocks
 - [ ] observity
 - [ ] image app
 - [ ] GRPC
-- [ ] concurrency
-- [ ] graceful shutdown

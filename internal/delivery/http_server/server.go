@@ -2,6 +2,8 @@ package http_server
 
 import (
 	"net/http"
+	"context"
+	"time"
 )
 
 type Server struct {
@@ -15,4 +17,8 @@ func (s *Server) Run(port string, handler http.Handler) error {
 	}
 
 	return s.httpServer.ListenAndServe()
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
 }
