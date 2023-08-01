@@ -3,7 +3,6 @@ package http_server
 import (
 	"net/http"
 	"context"
-	"time"
 )
 
 type Server struct {

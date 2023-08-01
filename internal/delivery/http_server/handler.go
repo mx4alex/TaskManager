@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"github.com/gin-gonic/gin"
 	"strconv"
+	"github.com/swaggo/gin-swagger" 
+    "github.com/swaggo/files" 
+	_ "TaskManager/docs"
 )
 
 type Handler struct {
@@ -19,6 +22,8 @@ func NewHandler(taskInteractor *usecase.TaskInteractor) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	tasks := router.Group("/tasks")
 	{
@@ -35,12 +40,28 @@ func (h *Handler) InitRoutes() *gin.Engine {
 type statusResponse struct {
 	Status string `json:"status"`
 }
+type errorResponse struct {
+	Message string `json:"message"`
+}
+type inputBody struct {
+	Text string `json:"name"`
+}
 
+// @Summary 	Create task
+// @Tags 		tasks
+// @Description create task
+// @ID 			create-task
+// @Accept  	json
+// @Produce  	json
+// @Param 		input body inputBody true "name task"
+// @Success 	200 {integer} integer 1
+// @Failure 	400,404 {object} errorResponse
+// @Failure 	default {object} errorResponse
+// @Router /tasks/ [post]
 func (h *Handler) CreateTaskHandler(c *gin.Context) {
 	var requestBody struct {
-		Text string `json:"text"`
+		Text string `json:"name"`
 	}
-
 	if err := c.BindJSON(&requestBody); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
@@ -55,6 +76,16 @@ func (h *Handler) CreateTaskHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, statusResponse{"Задача успешно создана"})
 }
 
+// @Summary 	Get tasks
+// @Tags 		tasks
+// @Description get all tasks
+// @ID 			get-task
+// @Accept  	json
+// @Produce  	json
+// @Success 	200 {integer} integer 1
+// @Failure 	400,404 {object} errorResponse
+// @Failure 	default {object} errorResponse
+// @Router /tasks/ [get]
 func (h *Handler) GetTasksHandler(c *gin.Context) {
 	tasks, err := h.taskInteractor.GetTasks()
 	if err != nil {
@@ -70,17 +101,27 @@ func (h *Handler) GetTasksHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, tasks)
 }
 
+// @Summary 	Update task
+// @Tags 		tasks
+// @Description update task
+// @ID 			update-task
+// @Accept  	json
+// @Produce 	json
+// @Param 		id path string true "update task by id"
+// @Param 		input body inputBody true "name task"
+// @Success 	200 {integer} integer 1
+// @Failure 	400,404 {object} errorResponse
+// @Failure 	default {object} errorResponse
+// @Router /tasks/{id} [put]
 func (h *Handler) UpdateTaskHandler(c *gin.Context) {
 	taskID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-
 	var requestBody struct {
-		Text string `json:"text"`
+		Text string `json:"name"`
 	}
-
 	if err := c.BindJSON(&requestBody); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
@@ -95,6 +136,17 @@ func (h *Handler) UpdateTaskHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, statusResponse{"Задача успешно обновлена"})
 }
 
+// @Summary 	Mark task
+// @Tags 		tasks
+// @Description mark task
+// @ID 			mark-task
+// @Accept  	json
+// @Produce  	json
+// @Param 		id path string true "mark task by id"
+// @Success 	200 {integer} integer 1
+// @Failure 	400,404 {object} errorResponse
+// @Failure 	default {object} errorResponse
+// @Router /tasks/{id}/mark [put]
 func (h *Handler) MarkTaskHandler(c *gin.Context) {
 	taskID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -111,6 +163,17 @@ func (h *Handler) MarkTaskHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, statusResponse{"Задача успешно отмечена как выполненная"})
 }
 
+// @Summary 	Delete task
+// @Tags 		tasks
+// @Description delete task
+// @ID 			delete-task
+// @Accept  	json
+// @Produce  	json
+// @Param 		id path string true "delete task by id"
+// @Success 	200 {integer} integer 1
+// @Failure 	400,404 {object} errorResponse
+// @Failure 	default {object} errorResponse
+// @Router /tasks/{id} [delete]
 func (h *Handler) DeleteTaskHandler(c *gin.Context) {
 	taskID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

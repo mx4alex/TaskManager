@@ -1,0 +1,189 @@
+basePath: /
+definitions:
+  http_server.errorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  http_server.inputBody:
+    properties:
+      name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API Server for TaskManager Application
+  title: Task Manager API
+  version: "1.0"
+paths:
+  /tasks/:
+    get:
+      consumes:
+      - application/json
+      description: get all tasks
+      operationId: get-task
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+      summary: Get tasks
+      tags:
+      - tasks
+    post:
+      consumes:
+      - application/json
+      description: create task
+      operationId: create-task
+      parameters:
+      - description: name task
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/http_server.inputBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+      summary: Create task
+      tags:
+      - tasks
+  /tasks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete task
+      operationId: delete-task
+      parameters:
+      - description: delete task by id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+      summary: Delete task
+      tags:
+      - tasks
+    put:
+      consumes:
+      - application/json
+      description: update task
+      operationId: update-task
+      parameters:
+      - description: update task by id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: name task
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/http_server.inputBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+      summary: Update task
+      tags:
+      - tasks
+  /tasks/{id}/mark:
+    put:
+      consumes:
+      - application/json
+      description: mark task
+      operationId: mark-task
+      parameters:
+      - description: mark task by id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/http_server.errorResponse'
+      summary: Mark task
+      tags:
+      - tasks
+swagger: "2.0"

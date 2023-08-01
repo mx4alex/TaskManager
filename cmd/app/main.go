@@ -14,6 +14,13 @@ import (
 	"os/signal"
 )
 
+// @title Task Manager API
+// @version 1.0
+// @description API Server for TaskManager Application
+
+// @host localhost:8080
+// @BasePath /
+
 func chooseStorage(appConfig config.Config) (usecase.TaskStorage, error) {
 	switch appConfig.StorageType {
 	case "memory":
