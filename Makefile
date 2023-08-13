@@ -8,4 +8,8 @@ migrate:
 test:
 	go test -v ./...
 swag:
+<<<<<<< HEAD
 	swag init -g cmd/app/main.go
+=======
+	swag init -g cmd/app/main.go
+>>>>>>> f0b38b762063932898c2dc0b0be090d8dad20f13

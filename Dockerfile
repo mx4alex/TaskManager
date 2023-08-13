@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 COPY ./ ./
 
-# install postgres
+# install psql
 RUN apt-get update
 RUN apt-get -y install postgresql-client
 
