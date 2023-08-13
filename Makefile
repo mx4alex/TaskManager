@@ -7,9 +7,5 @@ migrate:
 	migrate -path ./migrations -database 'postgres://postgres:qwerty@localhost:5432/postgres?sslmode=disable' up
 test:
 	go test -v ./...
-swag:
-<<<<<<< HEAD
+swag:  
 	swag init -g cmd/app/main.go
-=======
-	swag init -g cmd/app/main.go
->>>>>>> f0b38b762063932898c2dc0b0be090d8dad20f13
