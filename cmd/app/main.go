@@ -3,6 +3,7 @@ package main
 import (
 	"TaskManager/internal/config"
 	"TaskManager/internal/storage/sqlite_storage"
+	"TaskManager/internal/storage/postgres_storage"
 	"TaskManager/internal/storage/memory_storage"
 	"TaskManager/internal/usecase"
 	"TaskManager/internal/delivery/cli_application"
@@ -27,6 +28,8 @@ func chooseStorage(appConfig config.Config) (usecase.TaskStorage, error) {
 		return memory_storage.New()
 	case "sqlite":
 		return sqlite_storage.New()
+	case "postgres":
+		return postgres_storage.New(appConfig.Postgres)
 	default:
 		return nil, errors.New("wrong storage type")
 	}
