@@ -29,7 +29,8 @@ REST API сервис для работы с задачами, написанн�
 - [x] export/import json
 - [x] concurrency
 - [x] graceful shutdown
+- [x] dockerized
+- [ ] GRPC
 - [ ] integration tests
 - [ ] mocks
 - [ ] observity
-- [ ] image app
