@@ -9,7 +9,7 @@ interface: rest_api
 
 #конфигурация postgres
 postgres:
-  host: "localhost"
+  host: "db"
   port: 5432
   user: "postgres"
   password: "qwerty"

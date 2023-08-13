@@ -17,11 +17,12 @@ REST API сервис для работы с задачами, написанн�
 ## Вариации хранилища задач
 - memory
 - SQLite
+- PostgreSQL
 
 ## Статус
 - [x] unit tests
 - [x] clean architecture
-- [x] storage variations (memory, sqlite)
+- [x] storage variations (memory, sqlite, postgres)
 - [x] config
 - [x] migrations
 - [x] REST
