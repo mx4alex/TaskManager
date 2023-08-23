@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package task;
+option go_package = "TaskManager/api/task";
+
+service TaskService {
+    rpc CreateTask (CreateTaskRequest) returns (Status);
+    rpc GetTasks (Empty) returns (stream Task);
+    rpc UpdateTask (UpdateTaskRequest) returns (Status);
+    rpc MarkTask (MarkTaskRequest) returns (Status);
+    rpc DeleteTask (DeleteTaskRequest) returns (Status);
+}
+
+message Empty {}
+
+message Status {
+    string message = 1;
+}
+
+message Task {
+    int32 id = 1;
+    string text = 2;
+    bool done = 3;
+}
+
+message CreateTaskRequest {
+    string text = 1;
+}
+
+message UpdateTaskRequest {
+    int32 id = 1;
+    string text = 2;
+}
+
+message MarkTaskRequest {
+    int32 id = 1;
+}
+
+message DeleteTaskRequest {
+    int32 id = 1;
+}

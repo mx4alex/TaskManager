@@ -8,6 +8,7 @@ import (
 	"TaskManager/internal/usecase"
 	"TaskManager/internal/delivery/cli_application"
 	"TaskManager/internal/delivery/http_server"
+	"TaskManager/internal/delivery/grpc_server"
 	"context"
 	"log"
 	"errors"
@@ -44,6 +45,7 @@ func chooseInterface(appConfig config.Config, taskInteractor *usecase.TaskIntera
 		if err != nil {
 			log.Fatal(err)
 		}
+
 	case "rest_api":
 		handlers := http_server.NewHandler(taskInteractor)
 
@@ -65,6 +67,29 @@ func chooseInterface(appConfig config.Config, taskInteractor *usecase.TaskIntera
 		if err := srv.Shutdown(context.Background()); err != nil {
 			log.Fatal("error occured on server shutting down: %s", err.Error())
 		}
+		
+	case "grpc":
+		grpcHandler := grpc_server.NewHandler(appConfig.HostAddr, taskInteractor)
+
+		grpcServer, err := grpc_server.NewServer(appConfig.GrpcPort, grpcHandler)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		go func() {
+			if err := grpcServer.Run(); err != nil {
+				log.Fatalf("error occured while running grpc server: %s", err.Error())
+			}
+		}()
+		log.Print("App Started")
+
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, os.Interrupt)
+		<-quit
+	
+		log.Print("App Shutting Down")
+
+		grpcServer.Shutdown()
 	}
 }
 

@@ -1,13 +1,19 @@
-#тип хранилища данных (memory/sqlite/postgres)
-storage_type: postgres
+# тип хранилища данных (memory/sqlite/postgres)
+storage_type: memory
 
-#конфигурация http сервера
+# конфигурация handler
+host_addr: "localhost:8080"
+
+# конфигурация http сервера
 http_port: ":8080"
 
-#тип интерфейса (cli/rest_api)
-interface: rest_api
+# конфигурация grpc сервера
+grpc_port: ":8081"
 
-#конфигурация postgres
+# тип интерфейса (cli/rest_api/grpc)
+interface: grpc
+
+# конфигурация postgres
 postgres:
   host: "db"
   port: 5432

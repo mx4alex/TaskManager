@@ -11,7 +11,9 @@ const (
 
 type Config struct {
 	StorageType string 			`mapstructure:"storage_type"`
+	HostAddr 	string 			`mapstructure:"host_addr"`
 	HttpPort  	string			`mapstructure:"http_port"`
+	GrpcPort  	string			`mapstructure:"grpc_port"`
 	Interface   string  		`mapstructure:"interface"`
 	Postgres 	PostgresConfig  `mapstructure:"postgres"`
 }
