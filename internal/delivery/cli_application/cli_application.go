@@ -99,7 +99,8 @@ func (cli *TaskCLI) PrintTasks() error {
 	}
 
 	if len(tasks) == 0 {
-		return errors.New("Список задач пуст")
+		fmt.Println("Список задач пуст")
+		return nil
 	}
 
 	fmt.Println("Список задач:")
