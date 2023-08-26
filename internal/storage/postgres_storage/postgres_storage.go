@@ -9,7 +9,7 @@ import (
 )
 
 type PostgreSQLStorage struct {
-	db *sql.DB
+	DB *sql.DB
 }
 
 func New(cfg config.PostgresConfig) (*PostgreSQLStorage, error) {
@@ -32,11 +32,11 @@ func New(cfg config.PostgresConfig) (*PostgreSQLStorage, error) {
 		return nil, err
 	}
 
-	return &PostgreSQLStorage{db: db}, nil
+	return &PostgreSQLStorage{DB: db}, nil
 }
 
 func (s *PostgreSQLStorage) AddTask(newText string) error {
-	_, err := s.db.Exec("INSERT INTO tasks (text, done) VALUES ($1, $2)", newText, 0)
+	_, err := s.DB.Exec("INSERT INTO tasks (text, done) VALUES ($1, $2)", newText, 0)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func (s *PostgreSQLStorage) AddTask(newText string) error {
 }
 
 func (s *PostgreSQLStorage) GetTasks() ([]entity.Task, error) {
-	rows, err := s.db.Query("SELECT id, text, done FROM tasks")
+	rows, err := s.DB.Query("SELECT id, text, done FROM tasks")
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (s *PostgreSQLStorage) GetTasks() ([]entity.Task, error) {
 }
 
 func (s *PostgreSQLStorage) UpdateTask(id int, newText string) error {
-	_, err := s.db.Exec("UPDATE tasks SET text = $1 WHERE id = $2", newText, id)
+	_, err := s.DB.Exec("UPDATE tasks SET text = $1 WHERE id = $2", newText, id)
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func (s *PostgreSQLStorage) UpdateTask(id int, newText string) error {
 }
 
 func (s *PostgreSQLStorage) MarkTask(id int) error {
-	_, err := s.db.Exec("UPDATE tasks SET done = 1 WHERE id = $1", id)
+	_, err := s.DB.Exec("UPDATE tasks SET done = 1 WHERE id = $1", id)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (s *PostgreSQLStorage) MarkTask(id int) error {
 }
 
 func (s *PostgreSQLStorage) DeleteTask(id int) error {
-	_, err := s.db.Exec("DELETE FROM tasks WHERE id = $1", id)
+	_, err := s.DB.Exec("DELETE FROM tasks WHERE id = $1", id)
 	if err != nil {
 		return err
 	}

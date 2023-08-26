@@ -3,7 +3,6 @@ package sqlite_storage
 import (
 	"TaskManager/internal/entity"
 	"database/sql"
-	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -11,8 +10,7 @@ import (
 const tasksDB = "data/tasks.db"
 
 type SQLiteStorage struct {
-	db *sql.DB
-	id int
+	DB *sql.DB
 }
 
 func New() (*SQLiteStorage, error) {
@@ -30,24 +28,11 @@ func New() (*SQLiteStorage, error) {
 		return nil, err
 	}
 
-	return &SQLiteStorage{db: db}, nil
+	return &SQLiteStorage{DB: db}, nil
 }
 
 func (s *SQLiteStorage) AddTask(newText string) error {
-	statement, err := s.db.Prepare("INSERT INTO tasks (id, text, done) VALUES (?, ?, ?)")
-	if err != nil {
-		return err
-	}
-	defer statement.Close()
-
-	var count int
-	row := s.db.QueryRow("SELECT COUNT (id) FROM tasks")
-	err = row.Scan(&count)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = statement.Exec(count + 1, newText, false)
+	_, err := s.DB.Exec("INSERT INTO tasks (text, done) VALUES (?, ?)", newText, 0)
 	if err != nil {
 		return err
 	}
@@ -56,7 +41,7 @@ func (s *SQLiteStorage) AddTask(newText string) error {
 }
 
 func (s *SQLiteStorage) GetTasks() ([]entity.Task, error) {
-	rows, err := s.db.Query("SELECT id, text, done FROM tasks")
+	rows, err := s.DB.Query("SELECT id, text, done FROM tasks")
 	if err != nil {
 		return nil, err
 	}
@@ -66,27 +51,25 @@ func (s *SQLiteStorage) GetTasks() ([]entity.Task, error) {
 	for rows.Next() {
 		var id int
 		var text string
-		var done bool
+		var done int
 
 		err := rows.Scan(&id, &text, &done)
 		if err != nil {
 			return nil, err
 		}
 
-		tasks = append(tasks, entity.NewTask(id, text, done))
+		if done == 0 {
+			tasks = append(tasks, entity.NewTask(id, text, false))
+		} else {
+			tasks = append(tasks, entity.NewTask(id, text, true))
+		}
 	}
 
 	return tasks, nil
 }
 
 func (s *SQLiteStorage) UpdateTask(id int, newText string) error {
-	statement, err := s.db.Prepare("UPDATE tasks SET text = ? WHERE id = ?")
-	if err != nil {
-		return err
-	}
-	defer statement.Close()
-
-	_, err = statement.Exec(newText, id)
+	_, err := s.DB.Exec("UPDATE tasks SET text = ? WHERE id = ?", newText, id)
 	if err != nil {
 		return err
 	}
@@ -95,13 +78,7 @@ func (s *SQLiteStorage) UpdateTask(id int, newText string) error {
 }
 
 func (s *SQLiteStorage) MarkTask(id int) error {
-	statement, err := s.db.Prepare("UPDATE tasks SET done = 1 WHERE id = ?")
-	if err != nil {
-		return err
-	}
-	defer statement.Close()
-
-	_, err = statement.Exec(id)
+	_, err := s.DB.Exec("UPDATE tasks SET done = 1 WHERE id = ?", id)
 	if err != nil {
 		return err
 	}
@@ -110,13 +87,7 @@ func (s *SQLiteStorage) MarkTask(id int) error {
 }
 
 func (s *SQLiteStorage) DeleteTask(id int) error {
-	statement, err := s.db.Prepare("DELETE FROM tasks WHERE id = ?")
-	if err != nil {
-		return err
-	}
-	defer statement.Close()
-
-	_, err = statement.Exec(id)
+	_, err := s.DB.Exec("DELETE FROM tasks WHERE id = ?", id)
 	if err != nil {
 		return err
 	}
