@@ -47,6 +47,4 @@ REST API сервис для работы с задачами, написанн�
 - [x] graceful shutdown
 - [x] dockerized
 - [x] GRPC
-- [ ] integration tests
-- [ ] mocks
-- [ ] observity
+- [x] mocks
