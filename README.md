@@ -48,3 +48,4 @@ REST API сервис для работы с задачами, написанн�
 - [x] dockerized
 - [x] GRPC
 - [x] mocks
+- [ ] observability
