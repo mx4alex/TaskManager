@@ -37,16 +37,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	return router
 }
 
-type statusResponse struct {
-	Status string `json:"status"`
-}
-type errorResponse struct {
-	Message string `json:"message"`
-}
-type inputBody struct {
-	Text string `json:"name"`
-}
-
 // @Summary 	Create task
 // @Tags 		tasks
 // @Description create task
@@ -59,9 +49,7 @@ type inputBody struct {
 // @Failure 	default {object} errorResponse
 // @Router /tasks/ [post]
 func (h *Handler) CreateTaskHandler(c *gin.Context) {
-	var requestBody struct {
-		Text string `json:"name"`
-	}
+	var requestBody inputBody
 	if err := c.BindJSON(&requestBody); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
@@ -119,9 +107,8 @@ func (h *Handler) UpdateTaskHandler(c *gin.Context) {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	var requestBody struct {
-		Text string `json:"name"`
-	}
+	
+	var requestBody inputBody
 	if err := c.BindJSON(&requestBody); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
