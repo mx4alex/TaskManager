@@ -23,7 +23,7 @@ REST API сервис для работы с задачами, написанн�
 
 Документация находится в папке <a href="https://github.com/mx4alex/TaskManager/tree/main/docs">docs</a>
 
-Визуальная документация Swagger UI доступна по адресу `http://localhost:8080/swagger/index.html#`
+Визуальная документация Swagger UI доступна по адресу [`http://localhost:8080/swagger/index.html#`](http://localhost:8080/swagger/index.html#)
 
 ## Вариации интерфейса
 - CLI
@@ -34,18 +34,3 @@ REST API сервис для работы с задачами, написанн�
 - memory
 - SQLite
 - PostgreSQL
-
-## Статус
-- [x] unit tests
-- [x] clean architecture
-- [x] storage variations (memory, sqlite, postgres)
-- [x] config
-- [x] migrations
-- [x] REST
-- [x] export/import json
-- [x] concurrency
-- [x] graceful shutdown
-- [x] dockerized
-- [x] GRPC
-- [x] mocks
-- [ ] observability
